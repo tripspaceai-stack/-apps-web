@@ -255,9 +255,14 @@ export default function EditTrip() {
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-xl font-bold">{displayWorkspace.title}</h1>
-          <p className="text-sm text-gray-400">{displayWorkspace.summary}</p>
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.push('/admin/dashboard')} className="text-gray-400 hover:text-gray-700 text-sm flex items-center gap-1">
+            ← Trips
+          </button>
+          <div>
+            <h1 className="text-xl font-bold">{displayWorkspace.title}</h1>
+            <p className="text-sm text-gray-400">{displayWorkspace.summary}</p>
+          </div>
         </div>
         <LoadingButton onClick={async () => { await navigator.clipboard.writeText(shareUrl); alert('Share link copied!'); }}
           loadingText="Copying..." className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium">
