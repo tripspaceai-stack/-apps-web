@@ -84,6 +84,9 @@ export default function EditTrip() {
   const [modules, setModules] = useState<Modules>({});
   const [modulesSaving, setModulesSaving] = useState(false);
   const [modulesSaved, setModulesSaved] = useState(false);
+  const [ticketParsing, setTicketParsing] = useState(false);
+  const [ticketError, setTicketError] = useState('');
+  const ticketFileRef = useRef<HTMLInputElement>(null);
 
   // Chat state
   const [chatInput, setChatInput] = useState('');
@@ -114,6 +117,35 @@ export default function EditTrip() {
     setModulesSaving(false);
     setModulesSaved(true);
     setTimeout(() => setModulesSaved(false), 2000);
+  }
+
+  async function handleTicketUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setTicketParsing(true);
+    setTicketError('');
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(',')[1];
+      const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      try {
+        const res = await fetch(`${API}/ai/parse-ticket`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64, mediaType: file.type }),
+        });
+        const data = await res.json() as { flights?: Flight[]; error?: string };
+        if (data.flights?.length) {
+          setModules(m => ({ ...m, flights: [...(m.flights || []), ...data.flights!] }));
+        } else {
+          setTicketError('No flight data found in this file.');
+        }
+      } catch {
+        setTicketError('Failed to parse ticket.');
+      }
+      setTicketParsing(false);
+    };
+    reader.readAsDataURL(file);
   }
 
   function addFlight() {
@@ -333,12 +365,26 @@ export default function EditTrip() {
           <div className="max-w-2xl mx-auto p-6 space-y-6">
             {/* Flights */}
             <div className="bg-white rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <h2 className="font-bold text-lg">✈️ Flights</h2>
-                <button onClick={addFlight} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium">+ Add flight</button>
+                <button onClick={addFlight} className="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium">+ Add manually</button>
               </div>
-              {(modules.flights || []).length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-4">No flights added yet</p>
+
+              {/* Ticket upload */}
+              <input ref={ticketFileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleTicketUpload} />
+              <div onClick={() => !ticketParsing && ticketFileRef.current?.click()}
+                className={`border-2 border-dashed rounded-xl p-3 mb-4 flex items-center gap-3 cursor-pointer transition
+                  ${ticketParsing ? 'border-gray-200 bg-gray-50 cursor-default' : 'border-gray-200 hover:border-black hover:bg-gray-50'}`}>
+                <span className="text-xl">{ticketParsing ? '⏳' : '📎'}</span>
+                <div>
+                  <p className="text-sm font-medium text-gray-700">{ticketParsing ? 'Reading ticket...' : 'Upload ticket to auto-fill'}</p>
+                  <p className="text-xs text-gray-400">{ticketParsing ? 'Claude is extracting flight details' : 'JPG, PNG or PDF'}</p>
+                </div>
+              </div>
+              {ticketError && <p className="text-xs text-red-500 mb-3">{ticketError}</p>}
+
+              {(modules.flights || []).length === 0 && !ticketParsing && (
+                <p className="text-sm text-gray-400 text-center py-2">No flights added yet</p>
               )}
               {(modules.flights || []).map((f, i) => (
                 <div key={i} className="border rounded-xl p-4 mb-3">
