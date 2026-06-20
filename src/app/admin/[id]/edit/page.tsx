@@ -195,7 +195,20 @@ export default function EditTrip() {
       <div className="text-center">
         <div className="text-4xl mb-4">⚠️</div>
         <p className="text-xl font-semibold mb-2">Generation failed</p>
-        <button onClick={() => router.push('/admin/new')} className="mt-4 bg-black text-white px-6 py-2 rounded-xl">Try again</button>
+        <p className="text-gray-400 text-sm mb-4">Something went wrong with the AI. Try again?</p>
+        <LoadingButton
+          onClick={async () => {
+            await apiRequest(`/trips/${id}/retry`, { method: 'POST' });
+            fetchTrip();
+          }}
+          loadingText="Retrying..."
+          className="mt-2 bg-black text-white px-6 py-2 rounded-xl font-medium"
+        >
+          Retry generation
+        </LoadingButton>
+        <button onClick={() => router.push('/admin/new')} className="block mt-3 text-sm text-gray-400 hover:text-gray-600 mx-auto">
+          Or start a new trip
+        </button>
       </div>
     </div>
   );
