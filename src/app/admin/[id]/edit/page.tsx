@@ -157,7 +157,7 @@ export default function EditTrip() {
   const displayWorkspace = pendingDiff?.workspace ?? workspace;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b px-6 py-4 flex items-center justify-between shrink-0">
         <div>
