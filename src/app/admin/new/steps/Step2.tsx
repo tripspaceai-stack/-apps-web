@@ -32,6 +32,12 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ base64, mediaType }),
         });
+        if (!res.ok) {
+          const text = await res.text();
+          setParseError(`Server error ${res.status}: ${text.slice(0, 100)}`);
+          setParsing(false);
+          return;
+        }
         const data = await res.json();
 
         const updates: Partial<TripForm> = {};
