@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiRequest } from '@/lib/api';
@@ -15,11 +15,22 @@ interface Trip {
   archived: boolean;
 }
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+  account_type: string;
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const [showArchived, setShowArchived] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showProfile, setShowProfile] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) { router.push('/auth'); return; }
@@ -27,7 +38,26 @@ export default function Dashboard() {
       if (Array.isArray(data)) setTrips(data as Trip[]);
       setLoading(false);
     });
+    apiRequest('/auth/me').then(data => {
+      if (data && (data as User).email) setUser(data as User);
+    });
   }, [router]);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setShowProfile(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function logout() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    router.push('/auth');
+  }
 
   async function toggleArchive(trip: Trip, e: React.MouseEvent) {
     e.preventDefault();
@@ -49,6 +79,7 @@ export default function Dashboard() {
   }
 
   const visible = trips.filter(t => showArchived ? t.archived : !t.archived);
+  const initials = user?.name ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) : '?';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,11 +92,55 @@ export default function Dashboard() {
               {showArchived ? '← Active trips' : '🗄 Archived'}
             </button>
           </div>
-          {!showArchived && (
-            <Link href="/admin/new" className="bg-black text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-800">
-              + New Trip
-            </Link>
-          )}
+          <div className="flex items-center gap-3">
+            {!showArchived && (
+              <Link href="/admin/new" className="bg-black text-white px-4 py-2 rounded-xl font-medium hover:bg-gray-800">
+                + New Trip
+              </Link>
+            )}
+            {/* Profile avatar */}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setShowProfile(v => !v)}
+                className="w-9 h-9 rounded-full bg-gray-800 text-white text-sm font-semibold flex items-center justify-center hover:bg-gray-700 transition">
+                {initials}
+              </button>
+              {showProfile && (
+                <div className="absolute right-0 top-11 w-64 bg-white rounded-2xl shadow-lg border border-gray-100 p-4 z-50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-800 text-white text-sm font-semibold flex items-center justify-center shrink-0">
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{user?.name || '—'}</p>
+                      <p className="text-gray-400 text-xs truncate">{user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-100 pt-3 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Account</span>
+                      <span className="font-medium">{user?.account_type}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Member since</span>
+                      <span className="font-medium">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Trips</span>
+                      <span className="font-medium">{trips.length}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="mt-4 w-full text-sm text-red-500 hover:text-red-700 border border-red-100 hover:border-red-300 rounded-xl py-2 transition">
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {loading && <p className="text-gray-400 text-center py-20">Loading...</p>}
