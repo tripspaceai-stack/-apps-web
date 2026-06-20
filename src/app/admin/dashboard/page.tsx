@@ -40,6 +40,14 @@ export default function Dashboard() {
     setTrips(prev => prev.map(t => t.id === trip.id ? { ...t, archived: newArchived } : t));
   }
 
+  async function deleteTrip(trip: Trip, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm(`Delete "${trip.title}"? This cannot be undone.`)) return;
+    await apiRequest(`/trips/${trip.id}`, { method: 'DELETE' });
+    setTrips(prev => prev.filter(t => t.id !== trip.id));
+  }
+
   const visible = trips.filter(t => showArchived ? t.archived : !t.archived);
 
   return (
@@ -101,6 +109,11 @@ export default function Dashboard() {
                   onClick={e => toggleArchive(trip, e)}
                   className="opacity-0 group-hover:opacity-100 transition text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:border-gray-400 hover:text-gray-700 bg-white">
                   {trip.archived ? 'Restore' : 'Archive'}
+                </button>
+                <button
+                  onClick={e => deleteTrip(trip, e)}
+                  className="opacity-0 group-hover:opacity-100 transition text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-400 hover:bg-red-50 hover:text-red-600 bg-white">
+                  Delete
                 </button>
                 <span className="text-gray-300">→</span>
               </div>
