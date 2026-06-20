@@ -44,6 +44,7 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
         if (data.destination) updates.destination = data.destination;
         if (data.startDate) updates.startDate = data.startDate;
         if (data.endDate) updates.endDate = data.endDate;
+        if (data.flights?.length) updates.flights = data.flights;
 
         if (Object.keys(updates).length > 0) {
           update(updates);

@@ -16,6 +16,7 @@ export interface TripForm {
   accommodation: string;
   activities: string[];
   preferences: string;
+  flights?: object[];
 }
 
 const INITIAL: TripForm = {
@@ -51,6 +52,13 @@ export default function NewTrip() {
   async function submit() {
     const data = await apiRequest('/trips', { method: 'POST', body: JSON.stringify(form) }) as { id?: string; error?: string };
     if (!data.id) { alert(data.error || 'Failed to create trip'); return; }
+    // Save parsed flights as modules automatically
+    if (form.flights?.length) {
+      await apiRequest(`/trips/${data.id}/modules`, {
+        method: 'PUT',
+        body: JSON.stringify({ modules: { flights: form.flights } }),
+      });
+    }
     localStorage.removeItem('tripDraft');
     router.push(`/admin/${data.id}/edit`);
   }
