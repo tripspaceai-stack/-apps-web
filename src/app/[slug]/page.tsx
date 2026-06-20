@@ -1,20 +1,13 @@
 import { notFound } from 'next/navigation';
 import GuestWorkspaceClient from './GuestWorkspaceClient';
 
-interface Workspace {
-  title: string;
-  summary: string;
-  days: unknown[];
-  hotels: unknown[];
-  tips: string[];
-}
-
 interface Trip {
   id: string;
   slug: string;
   share_token: string;
   status: string;
-  workspace_json: Workspace | null;
+  workspace_json: unknown | null;
+  modules_json: unknown | null;
 }
 
 async function getTrip(slug: string, token: string): Promise<Trip | null> {
@@ -49,7 +42,8 @@ export default async function GuestWorkspace({
     <GuestWorkspaceClient
       tripId={trip.id}
       initialWorkspace={trip.workspace_json as Parameters<typeof GuestWorkspaceClient>[0]['initialWorkspace']}
-      slug={slug}
+      modules={trip.modules_json as Parameters<typeof GuestWorkspaceClient>[0]['modules']}
+      shareToken={token}
     />
   );
 }
