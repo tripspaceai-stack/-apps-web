@@ -96,7 +96,7 @@ export default function EditTrip() {
   }, [id]);
 
   async function fetchTrip() {
-    const data = await apiRequest(`/trips/${id}`);
+    const data = await apiRequest(`/trips/${id}`) as Trip & { error?: string };
     if (data.error) { router.push('/admin/dashboard'); return; }
     setTrip(data);
     setModules(data.modules_json || {});
@@ -147,7 +147,7 @@ export default function EditTrip() {
     const data = await apiRequest(`/trips/${id}/chat`, {
       method: 'POST',
       body: JSON.stringify({ message: msg }),
-    });
+    }) as { error?: string; messageId: string; summary: string; workspace: Workspace };
     setChatLoading(false);
     if (data.error) { alert(`Error: ${data.error}`); return; }
     setPendingDiff({ messageId: data.messageId, summary: data.summary, workspace: data.workspace });

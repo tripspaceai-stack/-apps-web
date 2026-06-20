@@ -22,7 +22,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!localStorage.getItem('accessToken')) { router.push('/auth'); return; }
     apiRequest('/trips').then(data => {
-      if (Array.isArray(data)) setTrips(data);
+      if (Array.isArray(data)) setTrips(data as Trip[]);
       setLoading(false);
     });
   }, [router]);

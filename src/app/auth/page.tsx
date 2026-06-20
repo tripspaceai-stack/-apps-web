@@ -17,7 +17,7 @@ export default function AuthPage() {
     setError('');
     setLoading(true);
     const body = mode === 'signup' ? { email, password, name } : { email, password };
-    const data = await apiRequest(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(body) });
+    const data = await apiRequest(`/auth/${mode}`, { method: 'POST', body: JSON.stringify(body) }) as { error?: string; accessToken: string; refreshToken: string };
     setLoading(false);
     if (data.error) { setError(data.error); return; }
     localStorage.setItem('accessToken', data.accessToken);

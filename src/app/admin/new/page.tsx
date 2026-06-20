@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiRequest } from '@/lib/api';
 import Step1 from './steps/Step1';
 import Step2 from './steps/Step2';
 import Step3 from './steps/Step3';
@@ -48,13 +49,8 @@ export default function NewTrip() {
   function back() { setStep(s => s - 1); }
 
   async function submit() {
-    const token = localStorage.getItem('accessToken');
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/trips`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
+    const data = await apiRequest('/trips', { method: 'POST', body: JSON.stringify(form) }) as { id?: string; error?: string };
+    if (!data.id) { alert(data.error || 'Failed to create trip'); return; }
     localStorage.removeItem('tripDraft');
     router.push(`/admin/${data.id}/edit`);
   }
