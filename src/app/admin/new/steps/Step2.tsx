@@ -45,8 +45,8 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
         } else {
           setParseError('Could not extract trip details from this image. Please fill in manually.');
         }
-      } catch {
-        setParseError('Failed to parse image. Please fill in manually.');
+      } catch (err) {
+        setParseError(`Error: ${err}. Please fill in manually.`);
       }
       setParsing(false);
     };
