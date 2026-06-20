@@ -12,10 +12,9 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
   const [parsing, setParsing] = useState(false);
   const [parseSuccess, setParseSuccess] = useState(false);
   const [parseError, setParseError] = useState('');
+  const [dragging, setDragging] = useState(false);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  async function processFile(file: File) {
 
     setParsing(true);
     setParseSuccess(false);
@@ -54,6 +53,18 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
     reader.readAsDataURL(file);
   }
 
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
+  }
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-1">Where and when?</h2>
@@ -61,9 +72,14 @@ export default function Step2({ form, update, onNext, onBack }: Props) {
 
       {/* Upload ticket */}
       <div
-        onClick={() => fileRef.current?.click()}
+        onClick={() => !parsing && fileRef.current?.click()}
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={handleDrop}
         className={`border-2 border-dashed rounded-xl p-4 mb-5 flex items-center gap-3 cursor-pointer transition
-          ${parsing ? 'border-gray-300 bg-gray-50' : 'border-gray-300 hover:border-black hover:bg-gray-50'}`}
+          ${parsing ? 'border-gray-300 bg-gray-50 cursor-default' :
+            dragging ? 'border-black bg-gray-50 scale-[1.01]' :
+            'border-gray-300 hover:border-black hover:bg-gray-50'}`}
       >
         <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFile} />
         <div className="text-2xl">{parsing ? '⏳' : '📎'}</div>
