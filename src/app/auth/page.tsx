@@ -54,15 +54,20 @@ export default function AuthPage() {
   async function handleGoogleCredential(response: { credential: string }) {
     setError('');
     setLoading(true);
-    const data = await apiRequest('/auth/google', {
-      method: 'POST',
-      body: JSON.stringify({ credential: response.credential }),
-    }) as { error?: string; accessToken: string; refreshToken: string };
-    setLoading(false);
-    if (data.error) { setError(data.error); return; }
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('refreshToken', data.refreshToken);
-    router.push('/admin/dashboard');
+    try {
+      const data = await apiRequest('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ credential: response.credential }),
+      }) as { error?: string; accessToken: string; refreshToken: string };
+      if (data.error) { setError(data.error); return; }
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      router.push('/admin/dashboard');
+    } catch (e) {
+      setError('Google sign-in failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
