@@ -128,12 +128,12 @@ export default function GuestWorkspaceClient({ tripId, initialWorkspace, modules
     await fetchSuggestions();
   }
 
-  const tabs: { key: Tab; label: string; show: boolean }[] = [
-    { key: 'itinerary', label: '📅 Itinerary', show: true },
-    { key: 'flights', label: '✈️ Flights', show: !!(modules?.flights?.length) },
-    { key: 'group', label: '👥 Group', show: !!(modules?.group?.length) },
-    { key: 'expenses', label: '💸 Expenses', show: true },
-    { key: 'suggestions', label: '💡 Suggestions', show: true },
+  const tabs = [
+    { key: 'itinerary' as Tab, label: '📅 Itinerary', show: true },
+    { key: 'flights' as Tab, label: '✈️ Flights', show: !!(modules?.flights?.length) },
+    { key: 'group' as Tab, label: '👥 Group', show: !!(modules?.group?.length) },
+    { key: 'expenses' as Tab, label: '💸 Expenses', show: true },
+    { key: 'suggestions' as Tab, label: '💡 Suggestions', show: true },
   ].filter(t => t.show);
 
   return (
