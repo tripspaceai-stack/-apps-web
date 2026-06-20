@@ -1,9 +1,10 @@
 'use client';
 import { TripForm } from '../page';
+import LoadingButton from '@/components/LoadingButton';
 
 const ACTIVITY_OPTIONS = ['Museums', 'Restaurants', 'Nightlife', 'Nature', 'Shopping', 'Sports', 'Art', 'History'];
 
-interface Props { form: TripForm; update: (f: Partial<TripForm>) => void; onBack: () => void; onSubmit: () => void; }
+interface Props { form: TripForm; update: (f: Partial<TripForm>) => void; onBack: () => void; onSubmit: () => Promise<void>; }
 
 export default function Step4({ form, update, onBack, onSubmit }: Props) {
   function toggleActivity(a: string) {
@@ -33,8 +34,8 @@ export default function Step4({ form, update, onBack, onSubmit }: Props) {
       </div>
       <div className="flex gap-3">
         <button onClick={onBack} className="flex-1 border py-3 rounded-xl font-medium hover:bg-gray-50">← Back</button>
-        <button onClick={onSubmit}
-          className="flex-1 bg-black text-white py-3 rounded-xl font-medium">Generate trip ✨</button>
+        <LoadingButton onClick={onSubmit} loadingText="Generating..."
+          className="flex-1 bg-black text-white py-3 rounded-xl font-medium">Generate trip ✨</LoadingButton>
       </div>
     </div>
   );

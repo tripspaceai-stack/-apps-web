@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiRequest } from '@/lib/api';
+import LoadingButton from '@/components/LoadingButton';
 
 interface Activity {
   name: string;
@@ -213,10 +214,10 @@ export default function EditTrip() {
           <h1 className="text-xl font-bold">{displayWorkspace.title}</h1>
           <p className="text-sm text-gray-400">{displayWorkspace.summary}</p>
         </div>
-        <button onClick={() => { navigator.clipboard.writeText(shareUrl); alert('Share link copied!'); }}
-          className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium">
+        <LoadingButton onClick={async () => { await navigator.clipboard.writeText(shareUrl); alert('Share link copied!'); }}
+          loadingText="Copying..." className="bg-black text-white px-4 py-2 rounded-xl text-sm font-medium">
           Share link 🔗
-        </button>
+        </LoadingButton>
       </div>
 
       {/* Pending diff banner */}
@@ -227,8 +228,8 @@ export default function EditTrip() {
             <span className="text-sm text-gray-700">{pendingDiff.summary}</span>
           </div>
           <div className="flex gap-2">
-            <button onClick={discardDiff} className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-600">Discard</button>
-            <button onClick={confirmDiff} className="text-sm px-3 py-1.5 rounded-lg bg-black text-white hover:bg-gray-800">Apply changes</button>
+            <LoadingButton onClick={discardDiff} loadingText="Discarding..." className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 text-gray-600">Discard</LoadingButton>
+            <LoadingButton onClick={confirmDiff} loadingText="Applying..." className="text-sm px-3 py-1.5 rounded-lg bg-black text-white hover:bg-gray-800">Apply changes</LoadingButton>
           </div>
         </div>
       )}
@@ -363,10 +364,10 @@ export default function EditTrip() {
               <p className="text-xs text-gray-400 mt-2">{(modules.group || []).length} members</p>
             </div>
 
-            <button onClick={saveModules} disabled={modulesSaving}
-              className="w-full bg-black text-white py-3 rounded-xl font-medium disabled:opacity-50 hover:bg-gray-800 transition">
-              {modulesSaving ? 'Saving...' : modulesSaved ? '✓ Saved!' : 'Save modules'}
-            </button>
+            <LoadingButton onClick={saveModules} loadingText="Saving..."
+              className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800 transition">
+              {modulesSaved ? '✓ Saved!' : 'Save modules'}
+            </LoadingButton>
           </div>
         )}
 
